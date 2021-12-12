@@ -21,6 +21,8 @@ IERC721 nftContract = IERC721(erc721contract);
 //Transfer the NFT from the user to the contract
 //assumes that a JavaScript call "await axieContract.approve(address(this), expectedTokenId)" has been 
 //previously made with the NFT owner's account. "msg.sender" in the external call below will be the contract's address. 
+//Though the Axie contract "was deployed before ERC721 was standardized", it implements the standard functions approve 
+//and safeTransferFrom. 
 //safeTransferFrom checks that msg.sender owns the NFT in question (we also check this offchain).
 //Also, it only works if the receiver is either an EOA or a smart contract that implements 
 //onERC721Received (implemented in the IERC721Receiver interface). Otherwise the call will revert.
