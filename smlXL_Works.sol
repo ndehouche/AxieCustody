@@ -12,12 +12,15 @@ event axieDeposited(
     );
 
 
-function depositAxie(address erc721contract, uint256 tokenId)
+function depositAxie(address erc721contract, uint256 tokenId) 
 public
 {
 //Instanciate the ERC721 contract for the transfer
+
 IERC721 nftContract = IERC721(erc721contract);
 //Transfer the NFT from the user to the contract
+//assumes that a JavaScript call "await axieContract.approve(address(this), expectedTokenId)" has been 
+//previously made with the NFT owner's account. "msg.sender" in the external call below will be the contract's address. 
 //safeTransferFrom checks that msg.sender owns the NFT in question (we also check this offchain).
 //Also, it only works if the receiver is either an EOA or a smart contract that implements 
 //onERC721Received (implemented in the IERC721Receiver interface). Otherwise the call will revert.
@@ -37,6 +40,13 @@ depositAxie(erc721contract, i);
 }
 }
 
+function ownerOf(address erc721contract, uint256 tokenId)
+public
+view
+returns(address){
+IERC721 nftContract = IERC721(erc721contract);
+ return nftContract.ownerOf(tokenId);  
+}
 
 
 // @Required function to instanciate this contract as an IERC721 receiver
