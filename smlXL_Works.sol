@@ -14,6 +14,13 @@ event axieDeposited(
         uint256 tokenId
     );
 
+event multipleAxiesDeposited(
+       //bytes32 indexed requestId,
+        address indexed depositor,
+        address erc721contract, //Unnecessary all over contract if only dealing with Axie
+        uint256[] tokenId
+    );
+
 
 function depositAxie(address erc721contract, uint256 tokenId) 
 public
@@ -41,9 +48,11 @@ public
 {
 //check what happens if msg.sender only owns some of the tokens in the tolkenId array but not all. 
 //Write appriate logic if the whole transaction does not revert
+IERC721 nftContract = IERC721(erc721contract);
 for(uint i=0; i<tokenId.length; i++){
-depositAxie(erc721contract, i);
+nftContract.transferFrom(msg.sender, address(this), tokenId[i]);
 }
+emit multipleAxiesDeposited(msg.sender,  erc721contract, tokenId);
 }
 
 function ownerOf(address erc721contract, uint256 tokenId)
