@@ -25,7 +25,7 @@ event multipleAxiesDeposited(
 function depositAxie(address erc721contract, uint256 tokenId) 
 public
 {
-//Instanciate the ERC721 contract for the transfer
+//Instanciate the ERC721 contract for the transfer. Can be gotten rid of if only  working with the Axie core contract contract.
 
 IERC721 nftContract = IERC721(erc721contract);
 //Transfer the NFT from the user to the contract
@@ -46,8 +46,7 @@ emit axieDeposited(msg.sender,  erc721contract, tokenId);
 function depositMultipleAxies(address erc721contract, uint256[] calldata tokenId)
 public
 {
-//check what happens if msg.sender only owns some of the tokens in the tolkenId array but not all. 
-//Write appriate logic if the whole transaction does not revert
+//We instanciate the contract once
 IERC721 nftContract = IERC721(erc721contract);
 for(uint i=0; i<tokenId.length; i++){
 nftContract.transferFrom(msg.sender, address(this), tokenId[i]);
