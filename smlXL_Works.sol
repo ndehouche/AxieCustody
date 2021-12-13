@@ -6,28 +6,42 @@ import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 contract smlXL_Works 
 //is IERC721Receiver 
 {
-uint depositId;
+//Instanciate the AxieCore ERC721 contract.
+address erc721contract=address(0xd346036DAE057209FD193954CaAF6455a3fb5cFc);
+IERC721 nftContract = IERC721(erc721contract);
+
+
+
+// Link depositors with an array containing the IDs of their Axies and each token ID with depositor
+mapping(address => uint[]) private depositorAxies; 
+mapping(uint => address) private axieDepositor; 
+
+// Deposit functions. The differnce between depositing one and multiple Axies is that in the former case
+// the size of the array is fixed.
 event axieDeposited(
-       //bytes32 indexed requestId,
         address indexed depositor,
-        address erc721contract, //Unnecessary all over contract if only dealing with Axie
         uint256 tokenId
     );
 
 event multipleAxiesDeposited(
-       //bytes32 indexed requestId,
         address indexed depositor,
-        address erc721contract, //Unnecessary all over contract if only dealing with Axie
         uint256[] tokenId
     );
 
+modifier isDepositor(uint _tokenId){
+require(msg.sender==axieDepositor[_tokenId]); 
+_;
+}
 
-function depositAxie(address erc721contract, uint256 tokenId) 
-public
+
+
+
+
+
+function depositAxie(uint256 tokenId) 
+external
+returns (uint)  // Returns the number of Axies currently held for msg.sender
 {
-//Instanciate the ERC721 contract for the transfer. Can be gotten rid of if only  working with the Axie core contract contract.
-
-IERC721 nftContract = IERC721(erc721contract);
 //Transfer the NFT from the user to the contract
 //assumes that a JavaScript call "await axieContract.approve(address(this), expectedTokenId)" has been 
 //previously made with the NFT owner's account. "msg.sender" in the external call below will be the contract's address. 
@@ -40,28 +54,55 @@ IERC721 nftContract = IERC721(erc721contract);
 //transfers to contracts that cannot handle being sent NFT. 
 //nftContract.safeTransferFrom(msg.sender, address(this), tokenId);
 nftContract.transferFrom(msg.sender, address(this), tokenId);
-emit axieDeposited(msg.sender,  erc721contract, tokenId);
+depositorAxies[msg.sender].push(tokenId);
+axieDepositor[tokenId]=msg.sender;
+emit axieDeposited(msg.sender,  tokenId);
+return depositorAxies[msg.sender].length;
+
 }
 
-function depositMultipleAxies(address erc721contract, uint256[] calldata tokenId)
-public
+function depositMultipleAxies(uint256[] calldata tokenId)
+external
+returns (uint)  // Returns the number of Axies currently held for msg.sender
 {
-//We instanciate the contract once
-IERC721 nftContract = IERC721(erc721contract);
+
 for(uint i=0; i<tokenId.length; i++){
 nftContract.transferFrom(msg.sender, address(this), tokenId[i]);
+depositorAxies[msg.sender].push(tokenId[i]);
+axieDepositor[tokenId[i]]=msg.sender;
 }
-emit multipleAxiesDeposited(msg.sender,  erc721contract, tokenId);
+emit multipleAxiesDeposited(msg.sender,  tokenId);
+return depositorAxies[msg.sender].length;
 }
 
-function ownerOf(address erc721contract, uint256 tokenId)
-public
+function viewAxies(address _depositor)
+external
+view
+returns(uint[] memory){
+return depositorAxies[msg.sender];
+
+}
+
+function viewDepositor(uint _tokenId)
+external
 view
 returns(address){
-IERC721 nftContract = IERC721(erc721contract);
- return nftContract.ownerOf(tokenId);  
+return axieDepositor[_tokenId];
+    
 }
 
+
+function withdrawAxie(uint256 _tokenId) 
+external
+isDepositor(_tokenId)
+returns (uint)  // Returns the number of Axies currently held for msg.sender
+{
+axieDepositor[_tokenId]=address(0);
+_id=getId(msg.sender,_tokenId);
+depositorAxies[msg.sender][_id] = depositorAxie[msg.sender][depositorAxie[msg.sender].length - 1];
+depositorAxies[msg.sender].pop();
+emit axieWithdrawn(msg.sender, _tokenId);
+}
 
 // @Required function to instanciate this contract as an IERC721 receiver
 //    function onERC721Received(
@@ -72,6 +113,9 @@ IERC721 nftContract = IERC721(erc721contract);
 //    ) public virtual override returns (bytes4) {
 //        return this.onERC721Received.selector;
 //    }
+
+
+
 
 
 }
