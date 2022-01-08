@@ -1,4 +1,4 @@
-contract smlXL_Works 
+contract Axiecustody
 //is IERC721Receiver 
 {
 //Instanciate the AxieCore ERC721 contract.
