@@ -1,4 +1,4 @@
-contract Axiecustody
+contract AxieCustody
 //is IERC721Receiver 
 {
 //Instanciate the AxieCore ERC721 contract.
